@@ -1,0 +1,6 @@
+@EndUserText.label: 'Upload DNTT - Header (projection)'
+@MappingRole: true
+define role ZC_UP_DNTT_HEAD {
+  grant select on ZC_UP_DNTT_HEAD
+    where inheriting conditions from entity ZI_UP_DNTT_HEAD;
+}

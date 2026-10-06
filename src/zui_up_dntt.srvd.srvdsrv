@@ -1,0 +1,5 @@
+@EndUserText.label: 'Upload DNTT'
+define service ZUI_UP_DNTT {
+  expose ZC_UP_DNTT_HEAD as DnttHead;
+  expose ZC_UP_DNTT_ITEM as DnttItem;
+}

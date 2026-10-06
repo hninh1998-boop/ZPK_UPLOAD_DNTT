@@ -1,0 +1,7 @@
+@EndUserText.label: 'Upload DNTT - Item'
+@MappingRole: true
+define role ZI_UP_DNTT_ITEM {
+  grant select on ZI_UP_DNTT_ITEM
+    where inheriting conditions from entity ZI_UP_DNTT_HEAD
+      replacing { root with _Head };
+}

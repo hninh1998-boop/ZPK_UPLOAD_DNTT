@@ -1,0 +1,142 @@
+@Metadata.layer: #CORE
+@UI.headerInfo: {
+  typeName: 'Đề nghị thanh toán',
+  typeNamePlural: 'Worklist',
+  title: { type: #STANDARD, value: 'DocumentSequenceNo' }
+}
+// Luôn tải các field dùng cho button (Check/Post/Delete theo Status, Print theo
+// CompanyCode/PostingDate/DocumentNumber) kể cả khi user ẩn cột trên bảng
+@UI.presentationVariant: [{
+  requestAtLeast: [ 'DocumentSequenceNo', 'Status', 'CompanyCode', 'PostingDate', 'DocumentNumber' ],
+  // Mặc định sắp xếp Document SequenceNo giảm dần (chứng từ mới lên trên)
+  sortOrder: [{ by: 'DocumentSequenceNo', direction: #DESC }],
+  visualizations: [{ type: #AS_LINEITEM }]
+}]
+annotate entity ZCE_UP_DNTT with
+{
+  @UI.lineItem: [{ position: 30 }]
+  @EndUserText.label: 'Document SequenceNo'
+  DocumentSequenceNo;
+
+  @UI.lineItem: [{ position: 140 }]
+  @UI.selectionField: [{ position: 30 }]
+  @EndUserText.label: 'Trg. Spec. G/L Ind'
+  TrgSpecGlInd;
+
+  @UI.lineItem: [{ position: 10, criticality: 'StatusCriticality' }]
+  @UI.selectionField: [{ position: 80 }]
+  @EndUserText.label: 'Status'
+  Status;
+
+  @UI.hidden: true
+  StatusCriticality;
+
+  @UI.lineItem: [{ position: 20 }]
+  @UI.selectionField: [{ position: 50 }]
+  @EndUserText.label: 'Document number'
+  DocumentNumber;
+
+  @UI.lineItem: [{ position: 40 }]
+  @UI.selectionField: [{ position: 10 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_CompanyCode', element: 'CompanyCode' } }]
+  @EndUserText.label: 'Company code'
+  CompanyCode;
+
+  @UI.lineItem: [{ position: 50 }]
+  @UI.selectionField: [{ position: 20 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_AccountingDocumentType', element: 'AccountingDocumentType' } }]
+  @EndUserText.label: 'JE Type'
+  JeType;
+
+  @UI.lineItem: [{ position: 60 }]
+  @UI.selectionField: [{ position: 70 }]
+  @EndUserText.label: 'Posting date'
+  PostingDate;
+
+  @UI.lineItem: [{ position: 70 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'Currency' } }]
+  @EndUserText.label: 'Currency'
+  Currency;
+
+  @UI.lineItem: [{ position: 80 }]
+  @EndUserText.label: 'Header Text'
+  HeaderText;
+
+  @UI.lineItem: [{ position: 90 }]
+  @UI.selectionField: [{ position: 40 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Supplier', element: 'Supplier' } }]
+  @EndUserText.label: 'Supplier'
+  Supplier;
+
+  @UI.lineItem: [{ position: 100 }]
+  @EndUserText.label: 'Payment Method'
+  PaymentMethod;
+
+  @UI.lineItem: [{ position: 110 }]
+  @EndUserText.label: 'Partner Bank Type'
+  PartnerBankType;
+
+  @UI.hidden: true
+  BankAccount;
+
+  @UI.hidden: true
+  Bank;
+
+  @UI.hidden: true
+  AccountHolder;
+
+  @UI.lineItem: [{ position: 120 }]
+  @EndUserText.label: 'Profit Center'
+  ProfitCenter;
+
+  @UI.lineItem: [{ position: 130 }]
+  @EndUserText.label: 'Due On'
+  DueOn;
+
+  @UI.lineItem: [{ position: 150 }]
+  @EndUserText.label: 'Tổng tiền thanh toán'
+  TotalAmount;
+
+  @UI.lineItem: [{ position: 160 }]
+  @EndUserText.label: 'Tổng tiền thuế'
+  TotalTax;
+
+  @UI.lineItem: [{ position: 170 }]
+  @EndUserText.label: 'Message'
+  Message;
+
+  @UI.selectionField: [{ position: 60 }]
+  @EndUserText.label: 'Created by'
+  CreatedBy;
+
+  @UI.selectionField: [{ position: 90 }]
+  @EndUserText.label: 'Created on'
+  CreatedOn;
+
+  // ---- Tham số in: chỉ dùng cho nút Print (truyền sang filter cùng tên của báo cáo ZDENGHITT),
+  //      không lọc danh sách. 1 giá trị giống bên báo cáo
+  @UI.selectionField: [{ position: 100 }]
+  @Consumption.filter: { multipleSelections: false, selectionType: #SINGLE }
+  @EndUserText.label: 'Người đề nghị'
+  NguoiDeNghi;
+
+  @UI.selectionField: [{ position: 110 }]
+  @Consumption.filter: { multipleSelections: false, selectionType: #SINGLE }
+  @EndUserText.label: 'Phòng ban'
+  PhongBan;
+
+  @UI.selectionField: [{ position: 120 }]
+  @Consumption.filter: { multipleSelections: false, selectionType: #SINGLE }
+  @EndUserText.label: 'Người lập'
+  NguoiLap;
+
+  @UI.selectionField: [{ position: 130 }]
+  @Consumption.filter: { multipleSelections: false, selectionType: #SINGLE }
+  @EndUserText.label: 'Trưởng phòng/Giám đốc'
+  GiamDoc;
+
+  @UI.selectionField: [{ position: 140 }]
+  @Consumption.filter: { multipleSelections: false, selectionType: #SINGLE }
+  @EndUserText.label: 'Kế toán'
+  KeToan;
+}

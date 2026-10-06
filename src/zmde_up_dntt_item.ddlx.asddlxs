@@ -1,0 +1,45 @@
+@Metadata.layer: #CORE
+@UI.headerInfo: {
+  typeName: 'Item',
+  typeNamePlural: 'Items',
+  title: { type: #STANDARD, value: 'ItemText' },
+  description: { type: #STANDARD, value: 'Assignment' }
+}
+annotate entity ZC_UP_DNTT_ITEM with
+{
+  @UI.facet: [
+    { id: 'idItemDetail', purpose: #STANDARD, type: #IDENTIFICATION_REFERENCE, label: 'Chi tiết', position: 10 }
+  ]
+  @UI.hidden: true
+  DocumentSequenceNo;
+
+  @UI.lineItem: [{ position: 10 }]
+  @UI.identification: [{ position: 10 }]
+  @EndUserText.label: 'Num'
+  Item;
+
+  @UI.lineItem: [{ position: 20 }]
+  @UI.identification: [{ position: 20 }]
+  @EndUserText.label: 'Trg. Spec. G/L Ind'
+  TrgSpecGlInd;
+
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 30 }]
+  @EndUserText.label: 'Assignment (Số Bill, #Số hóa đơn, Số hợp đồng...)'
+  Assignment;
+
+  @UI.lineItem: [{ position: 40 }]
+  @UI.identification: [{ position: 40 }]
+  @EndUserText.label: 'Item Text - Diễn giải'
+  ItemText;
+
+  @UI.lineItem: [{ position: 50 }]
+  @UI.identification: [{ position: 50 }]
+  @EndUserText.label: 'Số tiền thanh toán (Amount)'
+  Amount;
+
+  @UI.lineItem: [{ position: 60 }]
+  @UI.identification: [{ position: 60 }]
+  @EndUserText.label: 'Tiền thuế (Reference Key 2)'
+  ReferenceKey2;
+}

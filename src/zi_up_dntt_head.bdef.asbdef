@@ -1,0 +1,91 @@
+managed implementation in class zbp_i_up_dntt_head unique;
+strict ( 2 );
+with draft;
+
+define behavior for ZI_UP_DNTT_HEAD alias Head
+persistent table ztb_up_dntt_head
+draft table ztb_up_dntt_h_d
+lock master
+total etag LastChangedAt
+authorization master ( global )
+etag master LocalLastChangedAt
+{
+  create;
+  update;
+  delete ( features : instance ); // Chỉ xóa được Draft / Checked / Error
+  association _Item { create; with draft; }
+
+  // JE Type quyết định phân quyền (F_BKPF_BLA) -> không cho sửa sau khi tạo
+  field ( mandatory : create, readonly : update ) DocumentSequenceNo, JeType;
+  field ( readonly ) PostingDateConv, TrgSpecGlInd, TotalAmount, TotalTax, Status, StatusCriticality, DocumentNumber, Message,
+                     CreatedOn, CreatedBy, CreatedAt, LastChangedBy, LastChangedAt, LocalLastChangedAt;
+  field ( mandatory ) CompanyCode, PostingDate, Currency, Supplier, PaymentMethod, ProfitCenter, DueOn;
+
+  // Checked / Error mà có chỉnh sửa -> về Draft (phải Check lại)
+  determination setStatusDraft on save { create; update; }
+
+  draft action ( features : instance ) Edit; // Posted -> không cho sửa
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare;
+
+  mapping for ztb_up_dntt_head
+  {
+    DocumentSequenceNo = document_sequence_no;
+    CompanyCode        = company_code;
+    JeType             = je_type;
+    PostingDate        = posting_date;
+    PostingDateConv    = posting_date_conv;
+    Currency           = currency;
+    HeaderText         = header_text;
+    Supplier           = supplier;
+    PaymentMethod      = payment_method;
+    PartnerBankType    = partner_bank_type;
+    ProfitCenter       = profit_center;
+    DueOn              = due_on;
+    TrgSpecGlInd       = trg_spec_gl_ind;
+    TotalAmount        = total_amount;
+    TotalTax           = total_tax;
+    Status             = status;
+    DocumentNumber     = document_number;
+    Message            = message;
+    CreatedOn          = created_on;
+    CreatedBy          = created_by;
+    CreatedAt          = created_at;
+    LastChangedBy      = last_changed_by;
+    LastChangedAt      = last_changed_at;
+    LocalLastChangedAt = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_UP_DNTT_ITEM alias Item
+persistent table ztb_up_dntt_item
+draft table ztb_up_dntt_i_d
+lock dependent by _Head
+authorization dependent by _Head
+etag dependent by _Head
+early numbering
+{
+  update;
+  delete;
+  association _Head { with draft; }
+
+  field ( readonly ) DocumentSequenceNo;
+  field ( readonly : update ) Item;
+  field ( mandatory ) TrgSpecGlInd, Amount;
+
+  // Sửa / thêm / xóa item cũng đưa header về Draft
+  determination setStatusDraft on save { create; update; delete; }
+
+  mapping for ztb_up_dntt_item
+  {
+    DocumentSequenceNo = document_sequence_no;
+    Item               = item;
+    TrgSpecGlInd       = trg_spec_gl_ind;
+    Assignment         = assignment;
+    ItemText           = item_text;
+    Amount             = amount;
+    ReferenceKey2      = reference_key_2;
+  }
+}

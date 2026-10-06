@@ -1,0 +1,5 @@
+CLASS zbp_i_up_dntt_head DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zi_up_dntt_head.
+ENDCLASS.
+
+CLASS zbp_i_up_dntt_head IMPLEMENTATION.
+ENDCLASS.

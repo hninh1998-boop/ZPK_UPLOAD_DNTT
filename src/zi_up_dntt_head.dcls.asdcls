@@ -1,0 +1,7 @@
+@EndUserText.label: 'Upload DNTT - Header'
+@MappingRole: true
+define role ZI_UP_DNTT_HEAD {
+  grant select on ZI_UP_DNTT_HEAD
+    where ( CompanyCode ) = aspect pfcg_auth( 'F_BKPF_BUK', BUKRS, ACTVT = '03' )
+      and ( JeType )      = aspect pfcg_auth( 'F_BKPF_BLA', BRGRU, ACTVT = '03' );
+}

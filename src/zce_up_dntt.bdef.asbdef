@@ -1,0 +1,20 @@
+unmanaged implementation in class zbp_ce_up_dntt unique;
+strict ( 2 );
+
+define behavior for ZCE_UP_DNTT alias DnttList
+lock master
+authorization master ( global )
+{
+  static action downloadTemplate result [1] ZAE_DNTT_FILE;
+  static action uploadFile parameter ZAE_DNTT_FILE result [1] ZAE_DNTT_UPLOAD_RESULT;
+
+  // Xóa chứng từ (header + item) - chỉ Draft / Checked / Error
+  action deleteDocument;
+
+  // Check = gọi API Journal Entry - Post (Synchronous) với TestDataIndicator = true - chỉ Draft
+  // Static + danh sách chứng từ -> gọi API 1 lần cho cả lô (tối đa 10 chứng từ / request SOAP)
+  static action checkDocuments parameter ZAE_DNTT_DOC_LIST result [1] ZAE_DNTT_ACTION_RESULT;
+
+  // Post = gọi API thật (TestDataIndicator = false) - chỉ Checked -> Posted + Document number
+  static action postDocuments parameter ZAE_DNTT_DOC_LIST result [1] ZAE_DNTT_ACTION_RESULT;
+}

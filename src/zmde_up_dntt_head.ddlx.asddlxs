@@ -1,0 +1,152 @@
+@Metadata.layer: #CORE
+@UI.headerInfo: {
+  typeName: 'Đề nghị thanh toán',
+  typeNamePlural: 'Đề nghị thanh toán',
+  title: { type: #STANDARD, value: 'DocumentSequenceNo' },
+  description: { type: #STANDARD, value: 'HeaderText' }
+}
+annotate entity ZC_UP_DNTT_HEAD with
+{
+  /* Layout theo MH 2 - 4 cột:
+       Col1: Company code    | Supplier       | Partner Bank Type | Header Text
+       Col2: JE Type         | Payment Method | Bank Acc          | Document number
+       Col3: Posting date    | Due On         | Bank              | Status
+       Col4: Currency        | Profit Center  | Acc.Holder        | Message      */
+  @UI.facet: [
+    { id: 'idGeneral', purpose: #STANDARD, type: #COLLECTION, label: 'Đề nghị thanh toán', position: 10 },
+    { id: 'idCol1', parentId: 'idGeneral', type: #FIELDGROUP_REFERENCE, targetQualifier: 'Col1', position: 10 },
+    { id: 'idCol2', parentId: 'idGeneral', type: #FIELDGROUP_REFERENCE, targetQualifier: 'Col2', position: 20 },
+    { id: 'idCol3', parentId: 'idGeneral', type: #FIELDGROUP_REFERENCE, targetQualifier: 'Col3', position: 30 },
+    { id: 'idCol4', parentId: 'idGeneral', type: #FIELDGROUP_REFERENCE, targetQualifier: 'Col4', position: 40 },
+    { id: 'idItem', purpose: #STANDARD, type: #LINEITEM_REFERENCE, label: 'Chi tiết', position: 20, targetElement: '_Item' }
+  ]
+  @UI.lineItem: [{ position: 10 }]
+  @UI.selectionField: [{ position: 10 }]
+  @EndUserText.label: 'Document SequenceNo'
+  DocumentSequenceNo;
+
+  // ---- Col1
+  @UI.lineItem: [{ position: 20 }]
+  @UI.selectionField: [{ position: 20 }]
+  @UI.fieldGroup: [{ qualifier: 'Col1', position: 10 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_CompanyCode', element: 'CompanyCode' } }]
+  @EndUserText.label: 'Company code'
+  CompanyCode;
+
+  @UI.lineItem: [{ position: 60 }]
+  @UI.selectionField: [{ position: 30 }]
+  @UI.fieldGroup: [{ qualifier: 'Col1', position: 20 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Supplier', element: 'Supplier' } }]
+  @EndUserText.label: 'Supplier'
+  Supplier;
+
+  @UI.lineItem: [{ position: 100 }]
+  @UI.fieldGroup: [{ qualifier: 'Col1', position: 30 }]
+  @EndUserText.label: 'Partner Bank Type'
+  PartnerBankType;
+
+  @UI.lineItem: [{ position: 110 }]
+  @UI.fieldGroup: [{ qualifier: 'Col1', position: 40 }]
+  @EndUserText.label: 'Header Text'
+  HeaderText;
+
+  // ---- Col2
+  @UI.lineItem: [{ position: 30 }]
+  @UI.fieldGroup: [{ qualifier: 'Col2', position: 10 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_AccountingDocumentType', element: 'AccountingDocumentType' } }]
+  @EndUserText.label: 'JE Type'
+  JeType;
+
+  @UI.lineItem: [{ position: 70 }]
+  @UI.fieldGroup: [{ qualifier: 'Col2', position: 20 }]
+  @EndUserText.label: 'Payment Method'
+  PaymentMethod;
+
+  @UI.fieldGroup: [{ qualifier: 'Col2', position: 30 }]
+  @EndUserText.label: 'Bank Acc'
+  BankAccount;
+
+  @UI.lineItem: [{ position: 120 }]
+  @UI.selectionField: [{ position: 40 }]
+  @UI.fieldGroup: [{ qualifier: 'Col2', position: 40 }]
+  @EndUserText.label: 'Document number'
+  DocumentNumber;
+
+  // ---- Col3
+  @UI.lineItem: [{ position: 40 }]
+  @UI.fieldGroup: [{ qualifier: 'Col3', position: 10 }]
+  @Consumption.filter.hidden: true
+  @EndUserText.label: 'Posting date'
+  PostingDate;
+
+  @UI.lineItem: [{ position: 80 }]
+  @UI.fieldGroup: [{ qualifier: 'Col3', position: 20 }]
+  @Consumption.filter.hidden: true
+  @EndUserText.label: 'Due On'
+  DueOn;
+
+  @UI.fieldGroup: [{ qualifier: 'Col3', position: 30 }]
+  @EndUserText.label: 'Bank'
+  Bank;
+
+  @UI.lineItem: [{ position: 130, criticality: 'StatusCriticality' }]
+  @UI.selectionField: [{ position: 50 }]
+  @UI.fieldGroup: [{ qualifier: 'Col3', position: 40, criticality: 'StatusCriticality' }]
+  @EndUserText.label: 'Status'
+  Status;
+
+  // ---- Col4
+  @UI.lineItem: [{ position: 50 }]
+  @UI.fieldGroup: [{ qualifier: 'Col4', position: 10 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'Currency' } }]
+  @EndUserText.label: 'Currency'
+  Currency;
+
+  @UI.lineItem: [{ position: 90 }]
+  @UI.fieldGroup: [{ qualifier: 'Col4', position: 20 }]
+  @EndUserText.label: 'Profit Center'
+  ProfitCenter;
+
+  @UI.fieldGroup: [{ qualifier: 'Col4', position: 30 }]
+  @EndUserText.label: 'Acc.Holder'
+  AccountHolder;
+
+  @UI.lineItem: [{ position: 140 }]
+  @UI.fieldGroup: [{ qualifier: 'Col4', position: 40 }]
+  @EndUserText.label: 'Message'
+  Message;
+
+  // ---- Ẩn
+  @UI.hidden: true
+  StatusCriticality;
+
+  @UI.hidden: true
+  PostingDateConv;
+
+  @UI.hidden: true
+  TrgSpecGlInd;
+
+  @UI.hidden: true
+  TotalAmount;
+
+  @UI.hidden: true
+  TotalTax;
+
+  @UI.hidden: true
+  CreatedOn;
+
+  @UI.hidden: true
+  CreatedBy;
+
+  @UI.hidden: true
+  CreatedAt;
+
+  @UI.hidden: true
+  LastChangedBy;
+
+  @UI.hidden: true
+  LastChangedAt;
+
+  @UI.hidden: true
+  LocalLastChangedAt;
+}
