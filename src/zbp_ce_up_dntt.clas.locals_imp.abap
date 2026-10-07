@@ -47,13 +47,14 @@ CLASS lhc_dnttlist DEFINITION INHERITING FROM cl_abap_behavior_handler.
       END OF ty_summary.
 
     "! Check (test run) / Post qua API Journal Entry cho danh sách chứng từ "A1,A2,..."
-    "! - Chỉ xử lý chứng từ có status = iv_required_status, không đang Edit (draft)
+    "! - Chỉ xử lý chứng từ có status = iv_required_status (hoặc iv_alt_status nếu có), không đang Edit (draft)
     "! - Thành công -> iv_success_status (+ số chứng từ khi Post), lỗi API -> Error + message
     "! - Lỗi kết nối -> giữ nguyên status
     METHODS process_documents
       IMPORTING iv_document_list   TYPE string
                 iv_test_run        TYPE abap_bool
                 iv_required_status TYPE ztb_up_dntt_head-status
+                iv_alt_status      TYPE ztb_up_dntt_head-status OPTIONAL
                 iv_success_status  TYPE ztb_up_dntt_head-status
                 iv_action_text     TYPE string
                 iv_actvt           TYPE csequence
@@ -216,11 +217,13 @@ CLASS lhc_dnttlist IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD checkDocuments.
-    " Check = test run (TestDataIndicator = true): Draft -> Checked / Error
+    " Check = test run (TestDataIndicator = true): Draft / Error -> Checked / Error
     LOOP AT keys INTO DATA(ls_key).
       DATA(ls_summary) = process_documents( iv_document_list   = ls_key-%param-DocumentList
                                             iv_test_run        = abap_true
                                             iv_required_status = zcl_dntt_excel_upload=>c_status-draft
+                                            " Error -> cho check lại
+                                            iv_alt_status      = zcl_dntt_excel_upload=>c_status-error
                                             iv_success_status  = zcl_dntt_excel_upload=>c_status-checked
                                             iv_action_text     = `check`
                                             " Check = mô phỏng hạch toán -> cần quyền hiển thị
@@ -287,8 +290,11 @@ CLASS lhc_dnttlist IMPLEMENTATION.
       READ TABLE lt_head INTO DATA(ls_head) WITH KEY document_sequence_no = lv_doc.
       IF sy-subrc <> 0.
         APPEND |{ lv_doc }: không tồn tại| TO lt_details.
-      ELSEIF to_upper( ls_head-status ) <> to_upper( iv_required_status ).
-        APPEND |{ lv_doc }: đang ở trạng thái { ls_head-status }, chỉ { iv_action_text } được chứng từ { iv_required_status }|
+      ELSEIF to_upper( ls_head-status ) <> to_upper( iv_required_status )
+         AND ( iv_alt_status IS INITIAL OR to_upper( ls_head-status ) <> to_upper( iv_alt_status ) ).
+        DATA(lv_allowed) = COND string( WHEN iv_alt_status IS INITIAL THEN iv_required_status
+                                        ELSE |{ iv_required_status } / { iv_alt_status }| ).
+        APPEND |{ lv_doc }: đang ở trạng thái { ls_head-status }, chỉ { iv_action_text } được chứng từ { lv_allowed }|
                TO lt_details.
       ELSEIF line_exists( lt_draft[ DocumentSequenceNo = lv_doc ] ).
         APPEND |{ lv_doc }: đang được chỉnh sửa (draft), không { iv_action_text } được| TO lt_details.

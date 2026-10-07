@@ -11,7 +11,7 @@ authorization master ( global )
   // Xóa chứng từ (header + item) - chỉ Draft / Checked / Error
   action deleteDocument;
 
-  // Check = gọi API Journal Entry - Post (Synchronous) với TestDataIndicator = true - chỉ Draft
+  // Check = gọi API Journal Entry - Post (Synchronous) với TestDataIndicator = true - chỉ Draft / Error
   // Static + danh sách chứng từ -> gọi API 1 lần cho cả lô (tối đa 10 chứng từ / request SOAP)
   static action checkDocuments parameter ZAE_DNTT_DOC_LIST result [1] ZAE_DNTT_ACTION_RESULT;
 

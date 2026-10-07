@@ -26,6 +26,8 @@ define root custom entity ZCE_UP_DNTT
       Message            : abap.char(255);
       CreatedBy          : abap.char(12);
       CreatedOn          : abap.dats;
+      ChangedBy          : abap.char(12);
+      ChangedOn          : abap.dats;
       // Tham số in (chỉ là filter, không lọc dữ liệu) -> truyền sang báo cáo ZDENGHITT khi bấm Print
       NguoiDeNghi        : abap.char(80);
       PhongBan           : abap.char(80);

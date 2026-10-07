@@ -498,7 +498,9 @@ CLASS zcl_dntt_excel_upload IMPLEMENTATION.
     ENDIF.
 
     IF lr_supp IS NOT INITIAL.
-      SELECT Supplier FROM I_Supplier
+      " Chỉ kiểm tra tồn tại -> không phụ thuộc quyền xem supplier của user upload
+      " (supplier nhân viên - account group EMPL - bị DCL của I_Supplier ẩn với user thường)
+      SELECT Supplier FROM I_Supplier WITH PRIVILEGED ACCESS
         WHERE Supplier IN @lr_supp
         INTO TABLE @DATA(lt_supp).
       mt_supplier = VALUE #( FOR ls_s IN lt_supp ( CONV #( ls_s-Supplier ) ) ).
@@ -704,7 +706,9 @@ CLASS zcl_dntt_excel_upload IMPLEMENTATION.
       rv_value = iv_value.
       RETURN.
     ENDIF.
-    rv_value = |{ CONV ty_char10( iv_value ) ALPHA = IN }|.
+    " ALPHA = IN giữ nguyên độ dài 10 của field: mã có chữ (vd. NS0088) bị đệm khoảng trắng
+    " phía sau -> phải cắt, nếu không so sánh string với mt_supplier sẽ không khớp
+    rv_value = condense( |{ CONV ty_char10( iv_value ) ALPHA = IN }| ).
   ENDMETHOD.
 
 

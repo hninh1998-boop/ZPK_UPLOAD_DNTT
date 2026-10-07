@@ -116,7 +116,9 @@ CLASS zcl_ce_up_dntt_f01 IMPLEMENTATION.
         DocumentNumber     AS document_number,
         Message            AS message,
         CreatedBy          AS created_by,
-        CreatedAt          AS created_at
+        CreatedAt          AS created_at,
+        LastChangedBy      AS last_changed_by,
+        LastChangedAt      AS last_changed_at
     WHERE
         DocumentSequenceNo IN @lr_documentsequenceno
         AND CompanyCode    IN @lr_companycode
@@ -205,10 +207,14 @@ CLASS zcl_ce_up_dntt_f01 IMPLEMENTATION.
           TotalAmount        = ls_sum-total_amount
           TotalTax           = ls_sum-total_tax
           Message            = ls_head-message
-          CreatedBy          = ls_head-created_by ).
+          CreatedBy          = ls_head-created_by
+          ChangedBy          = ls_head-last_changed_by ).
 
       IF ls_head-created_at IS NOT INITIAL.
         CONVERT TIME STAMP ls_head-created_at TIME ZONE lv_timezone INTO DATE ls_base-CreatedOn.
+      ENDIF.
+      IF ls_head-last_changed_at IS NOT INITIAL.
+        CONVERT TIME STAMP ls_head-last_changed_at TIME ZONE lv_timezone INTO DATE ls_base-ChangedOn.
       ENDIF.
 
       " 1 dòng / chứng từ

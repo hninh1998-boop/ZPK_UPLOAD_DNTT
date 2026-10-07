@@ -101,6 +101,14 @@ annotate entity ZCE_UP_DNTT with
   @EndUserText.label: 'Tổng tiền thuế'
   TotalTax;
 
+  @UI.lineItem: [{ position: 162 }]
+  @EndUserText.label: 'Changed on'
+  ChangedOn;
+
+  @UI.lineItem: [{ position: 164 }]
+  @EndUserText.label: 'Changed by'
+  ChangedBy;
+
   @UI.lineItem: [{ position: 170 }]
   @EndUserText.label: 'Message'
   Message;
