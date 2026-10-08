@@ -14,11 +14,12 @@ define root custom entity ZCE_UP_DNTT
       Currency           : abap.char(3);
       HeaderText         : abap.char(25);
       Supplier           : abap.char(10);
+      SupplierName       : abap.char(130);
       PaymentMethod      : abap.char(1);
       PartnerBankType    : abap.char(4);
-      BankAccount        : abap.char(18);
-      Bank               : abap.char(60);
-      AccountHolder      : abap.char(60);
+      BankAccount        : abap.char(40);
+      Bank               : abap.char(110);
+      AccountHolder      : abap.char(110);
       ProfitCenter       : abap.char(6);
       DueOn              : abap.dats;
       TotalAmount        : abap.decfloat34;

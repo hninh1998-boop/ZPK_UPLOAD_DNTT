@@ -195,9 +195,12 @@ CLASS lhc_dnttlist IMPLEMENTATION.
         lv_error = |Chứng từ { ls_key-DocumentSequenceNo } không tồn tại|.
       ELSEIF to_upper( ls_head-status ) = to_upper( zcl_dntt_excel_upload=>c_status-posted ).
         lv_error = |Chứng từ { ls_key-DocumentSequenceNo } đã Posted, không được xóa|.
+      " Xóa không cần quyền riêng (06): user thấy được chứng từ trên danh sách thì xóa được, giống màn hình
+      " chi tiết. Vẫn check quyền hiển thị (03, cùng điều kiện với DCL ZI_UP_DNTT_HEAD) vì ở đây đọc
+      " thẳng bảng -> chặn gọi action trực tiếp với chứng từ không được xem
       ELSEIF zcl_dntt_auth=>is_authorized( iv_company_code = ls_head-company_code
                                            iv_je_type      = ls_head-je_type
-                                           iv_actvt        = zcl_dntt_auth=>c_actvt-delete ) = abap_false.
+                                           iv_actvt        = zcl_dntt_auth=>c_actvt-display ) = abap_false.
         " Message RAP bị cắt ở 50 ký tự -> câu ngắn
         lv_error = |{ ls_key-DocumentSequenceNo }: không có quyền xóa ({ ls_head-company_code }/{ ls_head-je_type })|.
       ELSEIF line_exists( lt_draft[ DocumentSequenceNo = ls_key-DocumentSequenceNo ] ).

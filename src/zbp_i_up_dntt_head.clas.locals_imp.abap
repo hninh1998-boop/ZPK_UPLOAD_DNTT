@@ -31,6 +31,43 @@ CLASS lcl_status IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
+"! Kiểm tra field bắt buộc khi lưu: field ( mandatory ) trong BDEF chỉ hiện dấu * trên UI, không tự chặn
+CLASS lcl_mandatory DEFINITION FINAL.
+  PUBLIC SECTION.
+    TYPES:
+      BEGIN OF ty_field,
+        name  TYPE string,  " Tên element CDS viết hoa
+        label TYPE string,
+      END OF ty_field,
+      tt_field TYPE STANDARD TABLE OF ty_field WITH EMPTY KEY.
+
+    "! Các field trong it_fields đang để trống ở is_data
+    CLASS-METHODS get_empty_fields
+      IMPORTING is_data          TYPE any
+                it_fields        TYPE tt_field
+      RETURNING VALUE(rt_fields) TYPE tt_field.
+
+    CLASS-METHODS get_text
+      IMPORTING iv_label       TYPE string
+      RETURNING VALUE(rv_text) TYPE string.
+ENDCLASS.
+
+CLASS lcl_mandatory IMPLEMENTATION.
+  METHOD get_empty_fields.
+    LOOP AT it_fields INTO DATA(ls_field).
+      ASSIGN COMPONENT ls_field-name OF STRUCTURE is_data TO FIELD-SYMBOL(<lv_value>).
+      IF sy-subrc = 0 AND <lv_value> IS INITIAL.
+        APPEND ls_field TO rt_fields.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD get_text.
+    " Message RAP bị cắt ở 50 ký tự -> câu ngắn
+    rv_text = |{ iv_label } không được để trống|.
+  ENDMETHOD.
+ENDCLASS.
+
 CLASS lhc_head DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
     METHODS get_global_authorizations FOR GLOBAL AUTHORIZATION
@@ -44,6 +81,12 @@ CLASS lhc_head DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
     METHODS setStatusDraft FOR DETERMINE ON SAVE
       IMPORTING keys FOR Head~setStatusDraft.
+
+    METHODS validateMandatory FOR VALIDATE ON SAVE
+      IMPORTING keys FOR Head~validateMandatory.
+
+    METHODS validateDates FOR VALIDATE ON SAVE
+      IMPORTING keys FOR Head~validateDates.
 ENDCLASS.
 
 CLASS lhc_head IMPLEMENTATION.
@@ -69,6 +112,72 @@ CLASS lhc_head IMPLEMENTATION.
 
   METHOD setStatusDraft.
     lcl_status=>set_draft( VALUE #( FOR ls_key IN keys ( ls_key-DocumentSequenceNo ) ) ).
+  ENDMETHOD.
+
+  METHOD validateMandatory.
+    READ ENTITIES OF zi_up_dntt_head IN LOCAL MODE
+      ENTITY Head
+        FIELDS ( CompanyCode PostingDate Currency Supplier PaymentMethod ProfitCenter DueOn )
+        WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_head).
+
+    " Đúng danh sách field ( mandatory ) của Head trong BDEF
+    DATA(lt_fields) = VALUE lcl_mandatory=>tt_field( ( name = 'COMPANYCODE'   label = `Company code` )
+                                                     ( name = 'PAYMENTMETHOD' label = `Payment Method` )
+                                                     ( name = 'POSTINGDATE'   label = `Posting date` )
+                                                     ( name = 'DUEON'         label = `Due On` )
+                                                     ( name = 'CURRENCY'      label = `Currency` )
+                                                     ( name = 'SUPPLIER'      label = `Supplier` )
+                                                     ( name = 'PROFITCENTER'  label = `Profit Center` ) ).
+
+    " Message không dùng %state_area: state message không về được màn hình (chỉ ra câu chung
+    " "Resolve data inconsistencies") -> trả message thường, đi kèm response của lần Save bị chặn
+    LOOP AT lt_head INTO DATA(ls_head).
+      LOOP AT lcl_mandatory=>get_empty_fields( is_data = ls_head it_fields = lt_fields ) INTO DATA(ls_field).
+        APPEND VALUE #( %tky = ls_head-%tky ) TO failed-head.
+        APPEND VALUE #( %tky = ls_head-%tky
+                        %msg = new_message_with_text( severity = if_abap_behv_message=>severity-error
+                                                      text     = lcl_mandatory=>get_text( ls_field-label ) ) )
+               TO reported-head ASSIGNING FIELD-SYMBOL(<ls_reported>).
+        " Đánh dấu field lỗi trên màn hình
+        ASSIGN COMPONENT ls_field-name OF STRUCTURE <ls_reported>-%element TO FIELD-SYMBOL(<lv_flag>).
+        IF sy-subrc = 0.
+          <lv_flag> = if_abap_behv=>mk-on.
+        ENDIF.
+      ENDLOOP.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD validateDates.
+    READ ENTITIES OF zi_up_dntt_head IN LOCAL MODE
+      ENTITY Head
+        FIELDS ( PostingDate DueOn )
+        WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_head).
+
+    DATA(lt_fields) = VALUE lcl_mandatory=>tt_field( ( name = 'POSTINGDATE' label = `Posting date` )
+                                                     ( name = 'DUEON'       label = `Due On` ) ).
+
+    LOOP AT lt_head INTO DATA(ls_head).
+      LOOP AT lt_fields INTO DATA(ls_field).
+        ASSIGN COMPONENT ls_field-name OF STRUCTURE ls_head TO FIELD-SYMBOL(<lv_value>).
+        " Để trống -> validateMandatory báo. Cùng quy tắc với lúc upload: dd/mm/yyyy và ngày phải tồn tại
+        IF sy-subrc <> 0 OR <lv_value> IS INITIAL
+           OR zcl_dntt_excel_upload=>to_date( condense( CONV string( <lv_value> ) ) ) IS NOT INITIAL.
+          CONTINUE.
+        ENDIF.
+
+        APPEND VALUE #( %tky = ls_head-%tky ) TO failed-head.
+        APPEND VALUE #( %tky = ls_head-%tky
+                        %msg = new_message_with_text( severity = if_abap_behv_message=>severity-error
+                                                      text     = |{ ls_field-label } phải là ngày dd/mm/yyyy| ) )
+               TO reported-head ASSIGNING FIELD-SYMBOL(<ls_reported>).
+        ASSIGN COMPONENT ls_field-name OF STRUCTURE <ls_reported>-%element TO FIELD-SYMBOL(<lv_flag>).
+        IF sy-subrc = 0.
+          <lv_flag> = if_abap_behv=>mk-on.
+        ENDIF.
+      ENDLOOP.
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD earlynumbering_cba_Item.
@@ -116,6 +225,9 @@ CLASS lhc_item DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
     METHODS setStatusDraft FOR DETERMINE ON SAVE
       IMPORTING keys FOR Item~setStatusDraft.
+
+    METHODS validateItem FOR VALIDATE ON SAVE
+      IMPORTING keys FOR Item~validateItem.
 ENDCLASS.
 
 CLASS lhc_item IMPLEMENTATION.
@@ -125,6 +237,42 @@ CLASS lhc_item IMPLEMENTATION.
     SORT lt_doc_no.
     DELETE ADJACENT DUPLICATES FROM lt_doc_no.
     lcl_status=>set_draft( lt_doc_no ).
+  ENDMETHOD.
+
+  METHOD validateItem.
+    READ ENTITIES OF zi_up_dntt_head IN LOCAL MODE
+      ENTITY Item
+        FIELDS ( TrgSpecGlInd Amount )
+        WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_item).
+
+    " Đúng danh sách field ( mandatory ) của Item trong BDEF
+    DATA(lt_fields) = VALUE lcl_mandatory=>tt_field( ( name = 'TRGSPECGLIND' label = `Trg. Spec. G/L Ind` )
+                                                     ( name = 'AMOUNT'       label = `Amount` ) ).
+
+    LOOP AT lt_item INTO DATA(ls_item).
+      DATA(lv_prefix) = |Item { CONV i( ls_item-Item ) }: |.
+
+      LOOP AT lcl_mandatory=>get_empty_fields( is_data = ls_item it_fields = lt_fields ) INTO DATA(ls_field).
+        APPEND VALUE #( %tky = ls_item-%tky ) TO failed-item.
+        APPEND VALUE #( %tky = ls_item-%tky
+                        %msg = new_message_with_text(
+                                 severity = if_abap_behv_message=>severity-error
+                                 text     = lcl_mandatory=>get_text( lv_prefix && ls_field-label ) ) )
+               TO reported-item.
+      ENDLOOP.
+
+      " Amount lưu dạng text -> phải tự kiểm tra là số (cùng quy tắc với lúc upload)
+      IF ls_item-Amount IS NOT INITIAL
+         AND zcl_dntt_excel_upload=>is_valid_amount( condense( CONV string( ls_item-Amount ) ) ) = abap_false.
+        APPEND VALUE #( %tky = ls_item-%tky ) TO failed-item.
+        APPEND VALUE #( %tky            = ls_item-%tky
+                        %element-Amount = if_abap_behv=>mk-on
+                        %msg            = new_message_with_text( severity = if_abap_behv_message=>severity-error
+                                                                 text     = |{ lv_prefix }Amount phải là số| ) )
+               TO reported-item.
+      ENDIF.
+    ENDLOOP.
   ENDMETHOD.
 ENDCLASS.
 

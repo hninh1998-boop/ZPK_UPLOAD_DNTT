@@ -43,6 +43,11 @@ CLASS zcl_dntt_excel_upload DEFINITION
       IMPORTING iv_value       TYPE string
       RETURNING VALUE(rv_date) TYPE d.
 
+    "! abap_true nếu là số hợp lệ theo format của Amount (chỉ chữ số, thập phân dùng dấu ,)
+    CLASS-METHODS is_valid_amount
+      IMPORTING iv_value        TYPE csequence
+      RETURNING VALUE(rv_valid) TYPE abap_bool.
+
     "! Số tiền dạng 1234 hoặc 1234,56 -> decfloat34. Không hợp lệ -> 0
     CLASS-METHODS to_amount
       IMPORTING iv_value         TYPE string
@@ -638,6 +643,11 @@ CLASS zcl_dntt_excel_upload IMPLEMENTATION.
     IF lv_days = 0 OR lv_back <> rv_date.
       CLEAR rv_date.
     ENDIF.
+  ENDMETHOD.
+
+
+  METHOD is_valid_amount.
+    rv_valid = xsdbool( matches( val = iv_value regex = c_regex_amount ) ).
   ENDMETHOD.
 
 

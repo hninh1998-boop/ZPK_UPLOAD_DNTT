@@ -235,7 +235,9 @@ CLASS zcl_dntt_je_api IMPLEMENTATION.
 
   METHOD build_entry.
     DATA(lv_test)     = COND string( WHEN iv_test_run = abap_true THEN `true` ELSE `false` ).
-    DATA(lv_posting)  = to_iso_date( is_head-posting_date_conv ).
+    " Đổi từ posting_date (như due_on): posting_date_conv chỉ được gán lúc upload,
+    " sửa Posting date ở màn hình chi tiết thì không được cập nhật
+    DATA(lv_posting)  = to_iso_date( zcl_dntt_excel_upload=>to_date( CONV #( is_head-posting_date ) ) ).
     DATA(lv_due_on)   = to_iso_date( zcl_dntt_excel_upload=>to_date( CONV #( is_head-due_on ) ) ).
     DATA(lv_currency) = escape( val = CONV string( is_head-currency ) format = cl_abap_format=>e_xml_attr ).
 

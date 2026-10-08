@@ -172,6 +172,14 @@ CLASS zcl_ce_up_dntt_f01 IMPLEMENTATION.
         lv_timezone = 'UTC'.
     ENDTRY.
 
+    " Supplier Name / Bank Acc / Bank / Acc.Holder: dùng chung logic với màn hình chi tiết
+    DATA(lt_supplier) = VALUE zcl_dntt_bank_calc=>tt_data( FOR ls_h IN lt_head
+                                                           ( supplier        = ls_h-supplier
+                                                             partnerbanktype = ls_h-partner_bank_type ) ).
+    SORT lt_supplier BY supplier partnerbanktype.
+    DELETE ADJACENT DUPLICATES FROM lt_supplier COMPARING supplier partnerbanktype.
+    zcl_dntt_bank_calc=>fill( CHANGING ct_data = lt_supplier ).
+
     LOOP AT lt_head INTO DATA(ls_head).
       READ TABLE lt_sum INTO ls_sum WITH TABLE KEY document_sequence_no = ls_head-document_sequence_no.
       IF sy-subrc <> 0.
@@ -209,6 +217,17 @@ CLASS zcl_ce_up_dntt_f01 IMPLEMENTATION.
           Message            = ls_head-message
           CreatedBy          = ls_head-created_by
           ChangedBy          = ls_head-last_changed_by ).
+
+      READ TABLE lt_supplier INTO DATA(ls_supplier)
+           WITH KEY supplier        = ls_head-supplier
+                    partnerbanktype = ls_head-partner_bank_type
+           BINARY SEARCH.
+      IF sy-subrc = 0.
+        ls_base-SupplierName  = ls_supplier-suppliername.
+        ls_base-BankAccount   = ls_supplier-bankaccount.
+        ls_base-Bank          = ls_supplier-bank.
+        ls_base-AccountHolder = ls_supplier-accountholder.
+      ENDIF.
 
       IF ls_head-created_at IS NOT INITIAL.
         CONVERT TIME STAMP ls_head-created_at TIME ZONE lv_timezone INTO DATE ls_base-CreatedOn.

@@ -24,11 +24,21 @@ etag master LocalLastChangedAt
   // Checked / Error mà có chỉnh sửa -> về Draft (phải Check lại)
   determination setStatusDraft on save { create; update; }
 
+  // field ( mandatory ) chỉ hiện dấu * trên UI, không tự chặn -> phải có validation
+  validation validateMandatory on save { create; update; }
+  // Posting date / Due On lưu dạng text (giữ nguyên giá trị user nhập) -> phải tự kiểm tra là ngày hợp lệ
+  validation validateDates on save { create; update; }
+
   draft action ( features : instance ) Edit; // Posted -> không cho sửa
   draft action Activate optimized;
   draft action Discard;
   draft action Resume;
-  draft determine action Prepare;
+  draft determine action Prepare
+  {
+    validation validateMandatory;
+    validation validateDates;
+    validation Item~validateItem;
+  }
 
   mapping for ztb_up_dntt_head
   {
@@ -77,6 +87,9 @@ early numbering
 
   // Sửa / thêm / xóa item cũng đưa header về Draft
   determination setStatusDraft on save { create; update; delete; }
+
+  // Phải đặt ở Item: validation của Head không chạy khi chỉ item thay đổi
+  validation validateItem on save { create; update; }
 
   mapping for ztb_up_dntt_item
   {

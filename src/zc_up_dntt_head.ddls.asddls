@@ -33,9 +33,11 @@ define root view entity ZC_UP_DNTT_HEAD
           _Item : redirected to composition child ZC_UP_DNTT_ITEM,
 
           @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZCL_DNTT_BANK_CALC'
-  virtual BankAccount   : abap.char(18),
+  virtual BankAccount   : abap.char(40),
           @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZCL_DNTT_BANK_CALC'
-  virtual Bank          : abap.char(60),
+  virtual Bank          : abap.char(110),
           @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZCL_DNTT_BANK_CALC'
-  virtual AccountHolder : abap.char(60)
+  virtual AccountHolder : abap.char(110),
+          @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZCL_DNTT_BANK_CALC'
+  virtual SupplierName  : abap.char(130)
 }

@@ -76,13 +76,21 @@ annotate entity ZCE_UP_DNTT with
   @EndUserText.label: 'Partner Bank Type'
   PartnerBankType;
 
-  @UI.hidden: true
+  // ---- Thông tin Supplier: cùng logic với màn hình chi tiết (ZCL_DNTT_BANK_CALC)
+  @UI.lineItem: [{ position: 161 }]
+  @EndUserText.label: 'Supplier Name'
+  SupplierName;
+
+  @UI.lineItem: [{ position: 162 }]
+  @EndUserText.label: 'Bank Acc'
   BankAccount;
 
-  @UI.hidden: true
+  @UI.lineItem: [{ position: 163 }]
+  @EndUserText.label: 'Bank'
   Bank;
 
-  @UI.hidden: true
+  @UI.lineItem: [{ position: 164 }]
+  @EndUserText.label: 'Acc.Holder'
   AccountHolder;
 
   @UI.lineItem: [{ position: 120 }]
@@ -101,11 +109,11 @@ annotate entity ZCE_UP_DNTT with
   @EndUserText.label: 'Tổng tiền thuế'
   TotalTax;
 
-  @UI.lineItem: [{ position: 162 }]
+  @UI.lineItem: [{ position: 165 }]
   @EndUserText.label: 'Changed on'
   ChangedOn;
 
-  @UI.lineItem: [{ position: 164 }]
+  @UI.lineItem: [{ position: 166 }]
   @EndUserText.label: 'Changed by'
   ChangedBy;
 
